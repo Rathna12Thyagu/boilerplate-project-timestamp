@@ -31,7 +31,7 @@ app.get("/api/:date?", function (req, res) {
     // Check if it's a UNIX timestamp (only digits)
     if (!isNaN(dateString) && /^\d+$/.test(dateString)) {
       // Convert to integer before passing to Date()
-      date = new Date(parseInt(dateString,10));
+      date = new Date(Number(dateString));
     } else {
       date = new Date(dateString);
     }
