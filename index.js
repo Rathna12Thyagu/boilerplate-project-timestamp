@@ -22,18 +22,34 @@ app.get('/', function(req, res) {
 });
 
 // Your first API endpoint
-app.post('/api/shorturl', (req, res) => {
-  const originalUrl = req.body.url;
-  const hostname = urlParser.parse(originalUrl).hostname;
 
+app.post('/api/shorturl', (req, res) => {
+  const userInput = req.body.url;
+
+  let hostname;
+  try {
+    const parsedUrl = new URL(userInput);
+
+    // Only allow http or https
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+      return res.json({ error: 'invalid url' });
+    }
+
+    hostname = parsedUrl.hostname;
+  } catch (err) {
+    // Invalid URL syntax
+    return res.json({ error: 'invalid url' });
+  }
+
+  // Check if hostname is real
   dns.lookup(hostname, (err) => {
     if (err) {
       return res.json({ error: 'invalid url' });
-    } else {
-      const shortUrl = counter++;
-      urlDatabase[shortUrl] = originalUrl;
-      res.json({ original_url: originalUrl, short_url: shortUrl });
     }
+
+    const shortUrl = counter++;
+    urlDatabase[shortUrl] = userInput;
+    res.json({ original_url: userInput, short_url: shortUrl });
   });
 });
 app.get('/api/shorturl/:short', (req, res) => {
